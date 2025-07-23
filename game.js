@@ -3,16 +3,16 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Установка размеров canvas
-canvas.width = 800;
-canvas.height = 400;
+canvas.width = 850;
+canvas.height = 500;
 
 // Цветовая палитра
 const colors = {
-    background: '#ffccf5',
-    cityDark: '#33001a',
-    cityLight: '#660033',
-    cat: '#ff66c4',
-    obstacle: '#990066',
+    background: '#FFFFFF',
+    cityDark: '#6A5ACD',
+    cityLight: '#BA55D3',
+    cat: '#FDEBD0',
+    obstacle: ['#B0C4DE', '#9370DB', '#ADD8E6', '#FFC0CB'],
     text: '#33001a'
 };
 
@@ -35,43 +35,67 @@ const cat = {
     jumpPower: -15,
     gravity: 0.8,
     isJumping: false,
-    
+
     draw() {
         // Тело котика
-        ctx.fillStyle = colors.cat;
+        ctx.fillStyle = '#FDEBD0'; // Бежевый
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        
+
+        // Щеки
+        ctx.fillStyle = '#FFC0CB'; // Розовый
+        ctx.fillRect(this.x + 5, this.y + 5, 10, 10); // Левая щека
+        ctx.fillRect(this.x + 25, this.y + 5, 10, 10); // Правая щека
+
         // Глаза
-        ctx.fillStyle = colors.cityDark;
-        ctx.fillRect(this.x + 10, this.y + 10, 5, 5);
-        ctx.fillRect(this.x + 25, this.y + 10, 5, 5);
-        
+        ctx.fillStyle = '#6B4226'; // Темно-коричневый
+        ctx.fillRect(this.x + 10, this.y + 10, 5, 5); // Левый глаз
+        ctx.fillRect(this.x + 25, this.y + 10, 5, 5); // Правый глаз
+
+        // Усы
+        ctx.strokeStyle = '#6B4226';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(this.x + 10, this.y + 20);
+        ctx.lineTo(this.x + 5, this.y + 30);
+        ctx.moveTo(this.x + 10, this.y + 20);
+        ctx.lineTo(this.x + 15, this.y + 30);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.x + 25, this.y + 20);
+        ctx.lineTo(this.x + 30, this.y + 30);
+        ctx.moveTo(this.x + 25, this.y + 20);
+        ctx.lineTo(this.x + 20, this.y + 30);
+        ctx.stroke();
+
         // Уши
+        ctx.fillStyle = '#000000'; // Черный
         ctx.beginPath();
         ctx.moveTo(this.x + 5, this.y);
         ctx.lineTo(this.x + 15, this.y - 15);
         ctx.lineTo(this.x + 25, this.y);
         ctx.fill();
-        
+
         ctx.beginPath();
         ctx.moveTo(this.x + 15, this.y);
         ctx.lineTo(this.x + 35, this.y - 15);
         ctx.lineTo(this.x + 35, this.y);
         ctx.fill();
-        
+
         // Хвост
+        ctx.fillStyle = '#000000'; // Черный
         ctx.beginPath();
         ctx.moveTo(this.x + this.width, this.y + 20);
         ctx.lineTo(this.x + this.width + 15, this.y + 10);
         ctx.lineTo(this.x + this.width + 15, this.y + 30);
         ctx.fill();
     },
-    
+
     update() {
         // Применяем гравитацию
         this.velocityY += this.gravity;
         this.y += this.velocityY;
-        
+
         // Проверка на землю
         if (this.y >= canvas.height - 100) {
             this.y = canvas.height - 100;
@@ -79,7 +103,7 @@ const cat = {
             this.isJumping = false;
         }
     },
-    
+
     jump() {
         if (!this.isJumping) {
             this.velocityY = this.jumpPower;
@@ -95,24 +119,14 @@ class Obstacle {
         this.height = 40 + Math.random() * 60;
         this.x = canvas.width;
         this.y = canvas.height - this.height - 60;
-        this.color = colors.obstacle;
+        this.color = colors.obstacle[Math.floor(Math.random() * colors.obstacle.length)];
     }
-    
+
     draw() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        
-        // Пиксельный узор на препятствии
-        ctx.fillStyle = colors.cityDark;
-        for (let i = 0; i < this.width; i += 10) {
-            for (let j = 0; j < this.height; j += 10) {
-                if (Math.random() > 0.7) {
-                    ctx.fillRect(this.x + i, this.y + j, 5, 5);
-                }
-            }
-        }
     }
-    
+
     update() {
         this.x -= gameSpeed;
     }
@@ -122,25 +136,26 @@ class Obstacle {
 function drawCityBackground() {
     // Градиент неба
     const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGradient.addColorStop(0, '#ff99e6');
-    skyGradient.addColorStop(1, '#ff33cc');
+    skyGradient.addColorStop(0, '#FF69B4'); // Розовый закат
+    skyGradient.addColorStop(0.5, '#BA55D3'); // Лавандовый
+    skyGradient.addColorStop(1, '#6A5ACD'); // Темно-лавандовый
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     // Здания на заднем плане
-    ctx.fillStyle = colors.cityDark;
+    ctx.fillStyle = '#6A5ACD'; // Темно-лавандовый
     const buildingCount = 10;
     const buildingWidth = canvas.width / buildingCount;
-    
+
     for (let i = 0; i < buildingCount; i++) {
         const height = 100 + Math.random() * 150;
         ctx.fillRect(i * buildingWidth, canvas.height - height, buildingWidth, height);
-        
+
         // Окна
-        ctx.fillStyle = colors.cityLight;
+        ctx.fillStyle = '#BA55D3'; // Светло-лавандовый
         const windowSize = 8;
         const windowPadding = 10;
-        
+
         for (let y = canvas.height - height + windowPadding; y < canvas.height - windowPadding; y += windowSize + windowPadding) {
             for (let x = i * buildingWidth + windowPadding; x < (i + 1) * buildingWidth - windowPadding; x += windowSize + windowPadding) {
                 if (Math.random() > 0.3) {
@@ -148,15 +163,15 @@ function drawCityBackground() {
                 }
             }
         }
-        ctx.fillStyle = colors.cityDark;
+        ctx.fillStyle = '#6A5ACD'; // Возвращаем цвет зданий
     }
-    
+
     // Дорога
-    ctx.fillStyle = colors.cityDark;
+    ctx.fillStyle = '#33001a';
     ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
-    
+
     // Разметка на дороге
-    ctx.fillStyle = colors.cityLight;
+    ctx.fillStyle = '#BA55D3';
     for (let i = 0; i < canvas.width; i += 60) {
         ctx.fillRect(i, canvas.height - 30, 30, 5);
     }
@@ -167,6 +182,13 @@ function drawScore() {
     ctx.fillStyle = colors.text;
     ctx.font = '24px "Press Start 2P", cursive';
     ctx.fillText(`Счет: ${score}`, 20, 40);
+}
+
+// Отрисовка инструкции
+function drawInstructions() {
+    ctx.fillStyle = colors.text;
+    ctx.font = '18px "Press Start 2P", cursive';
+    ctx.fillText('Двойной прыжок: двойное нажатие пробела', 20, 70);
 }
 
 // Проверка столкновений
@@ -189,7 +211,7 @@ function gameOver() {
     isGameOver = true;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     ctx.fillStyle = colors.cat;
     ctx.font = '36px "Press Start 2P", cursive';
     ctx.textAlign = 'center';
@@ -198,7 +220,7 @@ function gameOver() {
     ctx.font = '18px "Press Start 2P", cursive';
     ctx.fillText('Нажмите ПРОБЕЛ чтобы играть снова', canvas.width / 2, canvas.height / 2 + 80);
     ctx.textAlign = 'left';
-    
+
     cancelAnimationFrame(animationId);
 }
 
@@ -219,45 +241,46 @@ function resetGame() {
 function gameLoop(timestamp) {
     // Очистка canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Отрисовка фона
     drawCityBackground();
-    
+
     // Генерация препятствий
     if (timestamp - lastObstacleTime > obstacleInterval && !isGameOver) {
         obstacles.push(new Obstacle());
         lastObstacleTime = timestamp;
-        
+
         // Увеличиваем сложность
         if (score % 5 === 0) {
             gameSpeed += 0.2;
         }
     }
-    
+
     // Обновление и отрисовка препятствий
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].update();
         obstacles[i].draw();
-        
+
         // Удаление препятствий за пределами экрана
         if (obstacles[i].x + obstacles[i].width < 0) {
             obstacles.splice(i, 1);
             score++;
         }
     }
-    
+
     // Обновление и отрисовка котика
     cat.update();
     cat.draw();
-    
+
     // Проверка столкновений
     if (!isGameOver) {
         checkCollision();
     }
-    
-    // Отрисовка счета
+
+    // Отрисовка счета и инструкции
     drawScore();
-    
+    drawInstructions();
+
     // Продолжение игрового цикла
     if (!isGameOver) {
         animationId = requestAnimationFrame(gameLoop);
@@ -265,15 +288,31 @@ function gameLoop(timestamp) {
 }
 
 // Обработка нажатий клавиш
+let lastJumpTime = 0;
+const doubleJumpInterval = 200; // мс между нажатиями для двойного прыжка
+
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
+        e.preventDefault(); // Предотвращаем прокрутку страницы
         if (isGameOver) {
             resetGame();
         } else {
-            cat.jump();
+            const currentTime = Date.now();
+            // Если двойное нажатие и котик в воздухе, но ещё может прыгнуть
+            if (currentTime - lastJumpTime < doubleJumpInterval && cat.isJumping) {
+                cat.velocityY = cat.jumpPower; // Второй прыжок
+            } else if (!cat.isJumping) {
+                cat.jump();
+            }
+            lastJumpTime = currentTime;
         }
     }
 });
 
-// Запуск игры
-resetGame();
+// Обработка кнопки Play
+const playButton = document.getElementById('playButton');
+playButton.addEventListener('click', () => {
+    if (isGameOver || !animationId) {
+        resetGame();
+    }
+});
